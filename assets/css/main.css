@@ -698,6 +698,30 @@ section,
   background-color: var(--accent-color);
 }
 
+/* Native progress element styling */
+.skills progress.progress-bar {
+  width: 100%;
+  height: 10px;
+  border: none;
+  background-color: transparent;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.skills progress.progress-bar::-webkit-progress-bar {
+  background-color: transparent;
+}
+
+.skills progress.progress-bar::-webkit-progress-value {
+  background-color: var(--accent-color);
+  transition: width 0.9s ease;
+}
+
+.skills progress.progress-bar::-moz-progress-bar {
+  background-color: var(--accent-color);
+  transition: width 0.9s ease;
+}
+
 /*--------------------------------------------------------------
 # Resume Section
 --------------------------------------------------------------*/
