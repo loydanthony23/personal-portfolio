@@ -1,4 +1,4 @@
-name: GitHub Pages Deploy
+name: Deploy Resume Website
 
 on:
   push:
@@ -15,23 +15,65 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  validate-and-deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
         
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+    - name: Install HTML/CSS/JS validators
+      run: |
+        npm install -g html-validate
+        npm install -g csslint
+        npm install -g jshint
         
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: '.'
+    - name: Validate HTML
+      run: |
+        echo "Validating HTML files..."
+        html-validate index.html portfolio-details.html service-details.html starter-page.html
+        
+    - name: Validate CSS
+      run: |
+        echo "Validating CSS files..."
+        csslint assets/css/main.css || true  # Continue on CSS warnings
+        
+    - name: Validate JavaScript
+      run: |
+        echo "Validating JavaScript files..."
+        jshint assets/js/main.js || true  # Continue on JS warnings
+        
+    - name: Check for broken links
+      run: |
+        echo "Checking for broken links..."
+        # Install link checker
+        pip install linkchecker
+        linkchecker --check-extern index.html || true
+        
+    - name: Performance audit
+      run: |
+        echo "Running performance audit..."
+        # Install Lighthouse CI
+        npm install -g @lhci/cli@0.12.x
+        # Run basic performance check
+        lhci autorun --collect.url="file://$(pwd)/index.html" --collect.numberOfRuns=1 || true
+        
+    - name: Setup Pages
+      uses: actions/configure-pages@v4
+        
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: '.'
           
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
